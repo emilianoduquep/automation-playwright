@@ -53,4 +53,60 @@ test('Page - Playwright test', async ({page}) => {
 
 });
 
+test.only('UI Controls', async ({page}) => {
+
+    await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
+
+    const userName = page.locator("input#username");
+    const userPassword = page.locator("input#password");
+    const sighIn = page.locator("#signInBtn");
+
+    await userName.fill("rahulshettyacademy");
+    await userPassword.fill("learning");
+
+    // select dropdown menus
+    await page.locator("select.form-control").selectOption("consult");
+    await page.locator("select.form-control").selectOption({label: 'Student'});
+
+    // select radio buttons
+    await page.locator(".radiotextsty").last().click();
+
+    // assertion
+    expect(page.locator(".radiotextsty").last()).toBeChecked();
+
+    // this assertion will verify a boolean value
+    const isChecked = await page.locator(".radiotextsty").last().isChecked();
+    console.log(isChecked);
+    expect(isChecked).toBeTruthy();
+
+    await page.locator("#okayBtn").click();
+
+    // checkbox
+    await page.locator("#terms").click();
+    expect(await page.locator("#terms")).toBeChecked();
+    // with this command we are going to uncheck
+    await page.locator("#terms").uncheck();
+    expect(await page.locator("#terms").isChecked()).toBeFalsy();
+
+    // check it again
+    await page.locator("#terms").click();
+    expect(await page.locator("#terms").isChecked()).toBeTruthy();
+
+
+    // assertion to verify if the locator conteins or has a certain attribute present.
+    await expect(page.locator("[href*='documents-request']")).toHaveAttribute("class","blinkingText");
+
+    /*
+        what happens when we click on a link and it takes us to another tab?
+        that needs to be handled in a different way. Check the video 20
+    */
+    
+
+
+
+    
+
+    
+
+});
 
