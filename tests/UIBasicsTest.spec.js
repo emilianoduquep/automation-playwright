@@ -53,7 +53,7 @@ test('Page - Playwright test', async ({page}) => {
 
 });
 
-test.only('UI Controls', async ({page}) => {
+test('UI Controls', async ({page}) => {
 
     await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
 
@@ -100,13 +100,41 @@ test.only('UI Controls', async ({page}) => {
         what happens when we click on a link and it takes us to another tab?
         that needs to be handled in a different way. Check the video 20
     */
+
+});
+
+test('Child window handle', async ({browser}) => {
+    // in this example we are going to work how to handle child windows
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
+    const documentLink = page.locator("[href*='documents-request']");
+    const userName = page.locator("input#username");
+
+    // here is the trick: we need to have a listener to pay attention to the new window that will get opened.
+    const [newPage] = await Promise.all([
+        context.waitForEvent('page'), // listen for any new page (pending, fullfilled, rejected).
+        documentLink.click(), // new page is opened.
+    ])
+
+    const text1 = await newPage.locator(".red").textContent(); 
+    const text2 = text1.split('@');
+    const text3 = text2[1].split(" ");
+    const text4 = text3[0];
     
 
+    console.log(text1);
+    //Please email us at mentor@rahulshettyacademy.com with below template to receive response 
+    console.log(text2);
+    //['Please email us at mentor', 'rahulshettyacademy.com with below template to receive response ']
+    console.log(text3);
+    // ['rahulshettyacademy.com',  'with',  'below',  'template',  'to',  'receive',  'response',  '']
+    console.log(text4);
+    // rahulshettyacademy.com
 
 
+    await page.locator("input#username").fill(text4); // with this you go back to the parent page.
     
-
     
-
 });
 
