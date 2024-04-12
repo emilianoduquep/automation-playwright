@@ -1,6 +1,9 @@
 const {test, expect} = require('@playwright/test');
 
-test('Client App login - waitForLoadState', async ({page}) => {
+test.only('Client App login - waitForLoadState', async ({page}) => {
+
+    const products = page.locator(".card-body");
+    const productName = "ZARA COAT 3";
 
     await page.goto("https://rahulshettyacademy.com/client");
     await page.locator("#userEmail").fill("edp@gmail.com");
@@ -20,6 +23,99 @@ test('Client App login - waitForLoadState', async ({page}) => {
     // then, this is suppossed to wait until all the calls are successfully made, then we will be able to get the allTextContents() method.
     const titles = await page.locator(".card-body b").allTextContents();
     console.log(titles);
+    // Zara Coat 3
+    const countAmount = await products.count();
+
+    for(let i = 0; i < countAmount; i++)
+    {
+        // in this if, we are selecting only the text of the product to compare with the wanted one.
+        if (await products.nth(i).locator("b").textContent() === productName)
+        {
+            // add to cart
+            await products.nth(i).locator("text =  Add To Cart").click();
+            break;
+            
+        }  
+    }
+
+    await page.locator("[routerlink*=cart]").click();
+    
+    // ojo: aca si no coloco first() me encuentra varios div li pero waitFor() no funciona para todos, 
+    // por eso se selecciona solo el primero para que funcione.
+    // this element: .isVisible() does not have auto-waiting. That's why the previous line has to be written.
+    await page.locator("div li").first().waitFor(); // first is needed here becouse there are 6 elemnts matching this locator.
+    // if we do not put the first(), then it will generate an error.
+
+    // check if the element is visible
+    // this element: .isVisible() does not have auto-waiting. That's why the previous line has to be written.
+    const boolValue = await page.locator("h3:has-text('ZARA COAT 3')").isVisible();
+    expect(boolValue).toBeTruthy();
+
+    //await page.locator("button[type='button']").last().click();
+    await page.locator("text=Checkout").click();
+
+    // este delay hace que se escriba despacio en el campo
+    // await page.locator("[placeholder*='Select Country']").fill("ind", {delay:100});
+    await page.locator("[placeholder*='Select Country']").pressSequentially("ind");
+
+    // next line selects the elements in the automatic dropdown.
+    const dropdown = page.locator(".ta-results"); // 3 matches
+    await dropdown.waitFor();
+    const optionsCount = await dropdown.locator("button").count(); // 3 options
+
+    for(let i = 0; i < optionsCount; i++)
+    {
+        let text = await dropdown.locator("button").nth(i).textContent();
+        if (text === " India")
+        {
+            // click on that option
+            await dropdown.locator("button").nth(i).click();
+            break;
+        }
+    }
+    
+    // this is to validate an email address.
+    const email =  "edp@gmail.com";
+    const writtenEmail = await page.locator(".user__name label").textContent();
+    console.log("The email written is: " + writtenEmail);
+    await expect(page.locator(".user__name label")).toHaveText(email);
+
+    // this is to submit the order
+    await page.locator(".action__submit").click();
+
+    // verfies if the order was correctly placed.
+    await expect(page.locator(".hero-primary")).toHaveText(" Thankyou for the order. ");
+
+    // this is to get the order number
+    const orderId = await page.locator(".em-spacer-1 .ng-star-inserted").textContent();
+    console.log("the order number is: " + orderId);
+
+    // now on the top, we are going to click on the Orders tab
+    await page.locator(".btn.btn-custom[routerlink='/dashboard/myorders']").click();
+
+    // waits for the page to load all the orders present in the page.
+    await page.locator("tbody").waitFor();
+
+    // this will let us know how many lines of orders has been submitted.
+    const rows = page.locator("tbody tr");
+
+    // in this for, we are going to select the one that includes de order number
+    for(let i = 0; i < await rows.count(); i++)
+    {
+        // here we are using chaining locator to only verify the oder inside the selected row.
+        const rowOrderId = await rows.nth(i).locator("th").textContent();
+
+        if(orderId.includes(rowOrderId)) // this verifies a match inside the string.
+        {
+            // selects the 'view' button when we select the first buttton, since this shows 2 elements.
+            await rows.nth(i).locator("button.btn.btn-primary").first().click(); // this takes us to the order summary page.
+            break; // this is used in javascript to exit from the for cycle.
+        }
+    }
+
+    // this will get the order number and verify.
+    const orderIdDetails = await page.locator(".col-text").textContent();
+    expect(orderId.includes(orderIdDetails)).toBeTruthy();    
 
 
 });
