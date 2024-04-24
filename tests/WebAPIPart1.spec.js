@@ -1,5 +1,6 @@
 const {test, expect, request} = require('@playwright/test');
 
+// estas variables son globales
 const loginPayLoad = {userEmail: "edp@gmail.com", userPassword: "Nano1973!"};
 let token;
 
@@ -11,6 +12,7 @@ test.beforeAll( async () => {
     // esta informacion se saca del inspector, en la parte de network/fetch/name/payload
     const apiContext = await request.newContext();
     const loginResponse = await apiContext.post("https://rahulshettyacademy.com/api/ecom/auth/login", {data: loginPayLoad})
+    
     // el valor que retorna trae un response, que contiene entre otras cosas un json, el cual contiene un token
     expect(loginResponse.ok()).toBeTruthy();
     
