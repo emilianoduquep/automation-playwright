@@ -26,8 +26,7 @@ test('Play wright special locators', async ({page}) => {
     // await page.pause();
 });
 
-/*
-    note:
-    this very usefull with this command to have a runner 
-    npx playwright test --ui
-*/
+test('expect wait', async({page}) => {
+    await page.goto("https://demoqa.com/");
+    await expect(page.locator("//img[@src='/images/Toolsqa.jpg']")).toBeVisible();
+});
