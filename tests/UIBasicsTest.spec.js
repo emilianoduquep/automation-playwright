@@ -142,5 +142,6 @@ test('verify the selected value', async({page}) => {
     await page.goto("https://rahulshettyacademy.com/loginpagePractise/");
     const texto = await page.locator("select[class='form-control']").textContent();
     console.log(texto);
+    console.log(__dirname);
 })
 
